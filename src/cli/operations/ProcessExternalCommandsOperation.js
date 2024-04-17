@@ -1,6 +1,6 @@
 'use strict';
 
-const GrowingFile = require('growing-file');
+const fs = require('fs');
 const byline = require('byline');
 
 const ShutdownCommand = require('../commands/ShutdownCommand');
@@ -20,12 +20,15 @@ class ProcessExternalCommandsOperation {
     _awaitForCommand(callback) {
         const lineStream = byline.createStream();
 
-        const file = GrowingFile.open(this._commandFile, {
-            timeout: Number.MAX_VALUE,
-            interval: 1000
+        const watcher = fs.watchFile(this._commandFile, (curr, prev) => {
+            if (curr.mtime !== prev.mtime) {
+              const fileStream = fs.createReadStream(this._commandFile);
+              fileStream.pipe(lineStream);
+            }
         });
-
-        file.pipe(lineStream);
+        watcher.on('error', (err) => {
+            console.error('Error: ', err);
+        });
 
 
         lineStream.on('readable', function () {
