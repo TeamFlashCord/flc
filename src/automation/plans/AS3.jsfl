@@ -1,5 +1,7 @@
 'use strict';
 
+fl.showIdleMessage(false);
+
 function importScript(filePath) {
     var scriptPath = FLfile.uriToPlatformPath(fl.scriptURI);
     var scriptPathEnd = scriptPath.lastIndexOf('\\');
